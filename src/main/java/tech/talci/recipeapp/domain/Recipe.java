@@ -20,6 +20,7 @@ public class Recipe {
     private String source;
     private String directions;
     private Byte[] image;
+    private String Url;
     private Difficulty difficulty;
     private Notes notes; // OneToOne
     private Set<Ingredient> ingredients = new HashSet<>();
@@ -35,4 +36,6 @@ public class Recipe {
         this.ingredients.add(ingredient);
         return this;
     }
+
+
 }

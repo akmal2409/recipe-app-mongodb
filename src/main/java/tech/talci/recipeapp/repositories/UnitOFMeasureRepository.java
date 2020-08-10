@@ -7,7 +7,7 @@ import tech.talci.recipeapp.domain.UnitOfMeasure;
 import java.util.Optional;
 
 @Repository
-public interface UnitOFMeasureRepository extends CrudRepository<UnitOfMeasure, Long> {
+public interface UnitOFMeasureRepository extends CrudRepository<UnitOfMeasure, String> {
 
     Optional<UnitOfMeasure> findByDescription(String description);
 }
