@@ -1,0 +1,9 @@
+FROM centos
+
+RUN yum install -y java-11-openjdk-devel
+
+VOLUME /tmp
+ADD /recipe-app-0.0.1-SNAPSHOT.jar myapp.jar
+RUN sh -c 'touch /myapp.jar'
+ENTRYPOINT ["java","-Djava.security.edg=file:/dev/./urandom", "-jar", "/myapp.j>
+
