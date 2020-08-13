@@ -34,8 +34,6 @@ public class IngredientServiceImplTest {
     private final IngredientToIngredientCommand ingredientToIngredientCommand;
     private final IngredientCommandToIngredient ingredientCommandToIngredient;
 
-    UnitOfMeasureService unitOfMeasureService;
-
 
     IngredientService ingredientService;
 
@@ -72,23 +70,27 @@ public class IngredientServiceImplTest {
         ingredient1.setId("1");
 
         Ingredient ingredient2 = new Ingredient();
-        ingredient2.setId("2");
+        ingredient2.setId("1");
 
         Ingredient ingredient3 = new Ingredient();
         ingredient3.setId("3");
 
         recipe.addIngredient(ingredient1);
+        ingredient1.setRecipe(recipe);
         recipe.addIngredient(ingredient2);
+        ingredient2.setRecipe(recipe);
         recipe.addIngredient(ingredient3);
+        ingredient3.setRecipe(recipe);
         Optional<Recipe> recipeOptional = Optional.of(recipe);
 
         //when
-        when(recipeRepository.findById(anyString())).thenReturn(recipeOptional);
+        when(recipeReactiveRepository.findById(anyString())).thenReturn(Mono.just(recipe));
 
         //then
-        Mono<IngredientCommand> command = ingredientService.findByRecipeIdAndIngredientId("1", "3");
+        IngredientCommand command = ingredientService.findByRecipeIdAndIngredientId("1", "3").block();
 
-        assertEquals("3", command.block().getId());
+        assertEquals("3", command.getId());
+        verify(recipeReactiveRepository, times(1)).findById(anyString());
     }
 
     @Test
@@ -105,15 +107,15 @@ public class IngredientServiceImplTest {
         savedRecipe.getIngredients().iterator().next().setId("3");
 
         when(recipeRepository.findById(anyString())).thenReturn(recipeOptional);
-        when(recipeRepository.save(any())).thenReturn(savedRecipe);
+        when(recipeReactiveRepository.save(any())).thenReturn(Mono.just(savedRecipe));
 
         //when
-        Mono<IngredientCommand> savedCommand = ingredientService.saveIngredientCommand(command);
+        IngredientCommand savedCommand = ingredientService.saveIngredientCommand(command).block();
 
         //then
-        assertEquals("3", savedCommand.block().getId());
+        assertEquals("3", savedCommand.getId());
         verify(recipeRepository, times(1)).findById(anyString());
-        verify(recipeRepository, times(1)).save(any(Recipe.class));
+        verify(recipeReactiveRepository, times(1)).save(any(Recipe.class));
 
     }
 

@@ -16,6 +16,7 @@ import tech.talci.recipeapp.commands.IngredientCommand;
 import tech.talci.recipeapp.commands.RecipeCommand;
 import tech.talci.recipeapp.commands.UnitOfMeasureCommand;
 import tech.talci.recipeapp.domain.Ingredient;
+import tech.talci.recipeapp.domain.Recipe;
 import tech.talci.recipeapp.services.IngredientService;
 import tech.talci.recipeapp.services.RecipeService;
 
@@ -149,9 +150,9 @@ public class IngredientControllerTest {
 
     @Test
     public void testDeleteIngredient() throws Exception{
-        //given
-        Ingredient ingredient = new Ingredient();
-        ingredient.setId("1");
+
+        //when
+        when(ingredientService.deleteById(anyString(), anyString())).thenReturn(Mono.empty());
 
         //then
         mockMvc.perform(get("/recipe/1/ingredient/1/delete"))
