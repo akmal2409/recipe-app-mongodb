@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.HttpClientErrorException;
+import reactor.core.publisher.Mono;
 import tech.talci.recipeapp.commands.RecipeCommand;
 import org.springframework.http.MediaType;
 import tech.talci.recipeapp.domain.Recipe;
@@ -53,7 +54,7 @@ public class RecipeControllerTest {
         Recipe testRecipe = new Recipe();
         testRecipe.setId("1");
 
-        when(recipeService.findById(anyString())).thenReturn(testRecipe);
+        when(recipeService.findById(anyString())).thenReturn(Mono.just(testRecipe));
 
         mockMvc.perform(org.springframework.test.web.servlet
                 .request.MockMvcRequestBuilders.get("/recipe/1/show"))
@@ -76,7 +77,7 @@ public class RecipeControllerTest {
         RecipeCommand command = new RecipeCommand();
         command.setId("2");
 
-        when(recipeService.saveRecipeCommand(any())).thenReturn(command);
+        when(recipeService.saveRecipeCommand(any())).thenReturn(Mono.just(command));
 
         mockMvc.perform(post("/recipe")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -96,7 +97,7 @@ public class RecipeControllerTest {
         RecipeCommand command = new RecipeCommand();
         command.setId("2");
 
-        when(recipeService.findCommandById(anyString())).thenReturn(command);
+        when(recipeService.findCommandById(anyString())).thenReturn(Mono.just(command));
 
         mockMvc.perform(get("/recipe/2/update"))
                 .andExpect(status().isOk())
@@ -106,6 +107,9 @@ public class RecipeControllerTest {
 
     @Test
     public void testDeleteAction() throws Exception{
+        //when
+        when(recipeService.deleteById(anyString())).thenReturn(Mono.empty());
+
         mockMvc.perform(get("/recipe/1/delete"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"));
@@ -140,7 +144,7 @@ public class RecipeControllerTest {
         command.setId("2");
 
         //when
-        when(recipeService.saveRecipeCommand(any())).thenReturn(command);
+        when(recipeService.saveRecipeCommand(any())).thenReturn(Mono.just(command));
 
         //then
         mockMvc.perform(post("/recipe")

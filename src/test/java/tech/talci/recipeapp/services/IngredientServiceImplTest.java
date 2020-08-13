@@ -38,9 +38,6 @@ public class IngredientServiceImplTest {
     IngredientService ingredientService;
 
     @Mock
-    RecipeRepository recipeRepository;
-
-    @Mock
     UnitOfMeasureReactiveRepository unitOFMeasureRepository;
 
     @Mock
@@ -57,7 +54,7 @@ public class IngredientServiceImplTest {
         MockitoAnnotations.initMocks(this);
 
         ingredientService = new IngredientServiceImpl(ingredientToIngredientCommand, ingredientCommandToIngredient,
-                                        recipeReactiveRepository, unitOFMeasureRepository, recipeRepository);
+                                        recipeReactiveRepository, unitOFMeasureRepository);
     }
 
     @Test
@@ -81,7 +78,6 @@ public class IngredientServiceImplTest {
         ingredient2.setRecipe(recipe);
         recipe.addIngredient(ingredient3);
         ingredient3.setRecipe(recipe);
-        Optional<Recipe> recipeOptional = Optional.of(recipe);
 
         //when
         when(recipeReactiveRepository.findById(anyString())).thenReturn(Mono.just(recipe));
@@ -128,7 +124,6 @@ public class IngredientServiceImplTest {
         ingredient.setId("3");
         recipe.addIngredient(ingredient);
         ingredient.setRecipe(recipe);
-        Optional<Recipe> recipeOptional = Optional.of(recipe);
 
         when(recipeReactiveRepository.findById(anyString())).thenReturn(Mono.just(recipe));
         when(recipeReactiveRepository.save(any())).thenReturn(Mono.just(recipe));

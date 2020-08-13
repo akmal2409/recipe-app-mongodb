@@ -2,6 +2,8 @@ package tech.talci.recipeapp.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import tech.talci.recipeapp.commands.IngredientCommand;
 import tech.talci.recipeapp.commands.RecipeCommand;
 import tech.talci.recipeapp.converters.RecipeCommandToRecipe;
@@ -10,9 +12,11 @@ import tech.talci.recipeapp.domain.Ingredient;
 import tech.talci.recipeapp.domain.Recipe;
 import tech.talci.recipeapp.exceptions.NotFoundException;
 import tech.talci.recipeapp.repositories.RecipeRepository;
+import tech.talci.recipeapp.repositories.reactive.RecipeReactiveRepository;
 
 import javax.transaction.Transactional;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,57 +24,60 @@ import java.util.Set;
 @Service
 public class RecipeServiceImpl implements RecipeService{
 
-    private final RecipeRepository recipeRepository;
     private final RecipeCommandToRecipe recipeCommandToRecipe;
     private final RecipeToRecipeCommand recipeToRecipeCommand;
+    private final RecipeReactiveRepository recipeReactiveRepository;
 
-    public RecipeServiceImpl(RecipeRepository recipeRepository, RecipeCommandToRecipe recipeCommandToRecipe,
-                             RecipeToRecipeCommand recipeToRecipeCommand) {
-        this.recipeRepository = recipeRepository;
+    public RecipeServiceImpl(RecipeCommandToRecipe recipeCommandToRecipe,
+                             RecipeToRecipeCommand recipeToRecipeCommand, RecipeReactiveRepository recipeReactiveRepository) {
         this.recipeCommandToRecipe = recipeCommandToRecipe;
         this.recipeToRecipeCommand = recipeToRecipeCommand;
+        this.recipeReactiveRepository = recipeReactiveRepository;
     }
 
     @Override
-    public Set<Recipe> getRecipes() {
+    public Flux<Recipe> getRecipes() {
         log.debug("I'm in the service");
 
-        Set<Recipe> recipeSet = new HashSet<>();
-        recipeRepository.findAll().iterator().forEachRemaining(recipeSet::add);
-        return  recipeSet;
+        return recipeReactiveRepository.findAll();
     }
 
     @Override
-    public Recipe findById(String id){
+    public Mono<Recipe> findById(String id){
 
-        Optional<Recipe> recipeOptional = recipeRepository.findById(id);
+        Recipe recipe = recipeReactiveRepository.findById(id).block();
 
-        if(!recipeOptional.isPresent()){
-            throw new NotFoundException("Recipe Not Found. ID: " + id.toString());
+        if(recipe == null){
+            throw new NotFoundException("Recipe Not Found. ID: " + id);
         }
 
-        return recipeOptional.get();
+
+        return Mono.just(recipe);
     }
 
     @Override
     @Transactional
-    public RecipeCommand saveRecipeCommand(RecipeCommand command) {
+    public Mono<RecipeCommand> saveRecipeCommand(RecipeCommand command) {
         Recipe detachedRecipe = recipeCommandToRecipe.convert(command); // Detached from Hibernate context
 
-        Recipe savedRecipe = recipeRepository.save(detachedRecipe); // We save it, Data JPA creates entity or meges
+        Recipe savedRecipe = recipeReactiveRepository.save(detachedRecipe).block(); // We save it, Data JPA creates entity or meges
         log.debug("Saved recipeID: " + savedRecipe.getId());
-        return recipeToRecipeCommand.convert(savedRecipe);
+        RecipeCommand savedCommand = recipeToRecipeCommand.convert(savedRecipe);
+
+        return Mono.just(savedCommand);
     }
 
     @Override
     @Transactional
-    public RecipeCommand findCommandById(String id) {
-        return recipeToRecipeCommand.convert(findById(id));
+    public Mono<RecipeCommand> findCommandById(String id) {
+        return Mono.just(recipeToRecipeCommand.convert(findById(id).block()));
     }
 
     @Override
-    public void deleteById(String id) {
-        recipeRepository.deleteById(id);
+    public Mono<Void> deleteById(String id) {
+        recipeReactiveRepository.deleteById(id).block();
+
+        return Mono.empty();
     }
 
 }

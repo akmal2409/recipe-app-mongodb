@@ -4,15 +4,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import tech.talci.recipeapp.converters.RecipeCommandToRecipe;
 import tech.talci.recipeapp.converters.RecipeToRecipeCommand;
 import tech.talci.recipeapp.domain.Recipe;
 import tech.talci.recipeapp.exceptions.NotFoundException;
 import tech.talci.recipeapp.repositories.RecipeRepository;
+import tech.talci.recipeapp.repositories.reactive.RecipeReactiveRepository;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -23,7 +24,7 @@ public class RecipeServiceImplTest {
     RecipeServiceImpl recipeService;
 
     @Mock
-    RecipeRepository recipeRepository;
+    RecipeReactiveRepository recipeReactiveRepository;
 
     @Mock
     RecipeToRecipeCommand recipeToRecipeCommand;
@@ -35,38 +36,39 @@ public class RecipeServiceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        recipeService = new RecipeServiceImpl(recipeRepository, recipeCommandToRecipe, recipeToRecipeCommand);
+        recipeService = new RecipeServiceImpl(recipeCommandToRecipe, recipeToRecipeCommand,
+                recipeReactiveRepository);
     }
 
     @Test
     public void getRecipeByIdTest() throws Exception {
         Recipe recipe = new Recipe();
         recipe.setId("1");
-        Optional<Recipe> recipeOptional = Optional.of(recipe);
 
-        when(recipeRepository.findById(any())).thenReturn(recipeOptional);
+        when(recipeReactiveRepository.findById(anyString())).thenReturn(Mono.just(recipe));
 
-        Recipe recipeReturned = recipeService.findById("1");
+        Recipe recipeReturned = recipeService.findById("1").block();
 
         assertNotNull("Null recipe returned", recipeReturned);
-        verify(recipeRepository, times(1)).findById(anyString());
-        verify(recipeRepository, never()).findAll();
+        verify(recipeReactiveRepository, times(1)).findById(anyString());
+        verify(recipeReactiveRepository, never()).findAll();
     }
 
     @Test
     public void getRecipesTest() throws Exception {
 
         Recipe recipe = new Recipe();
-        HashSet receipesData = new HashSet();
-        receipesData.add(recipe);
+        recipe.setId("1");
+        Recipe recipe2 = new Recipe();
+        recipe2.setId("2");
 
-        when(recipeService.getRecipes()).thenReturn(receipesData);
+        when(recipeService.getRecipes()).thenReturn(Flux.just(recipe, recipe2));
 
-        Set<Recipe> recipes = recipeService.getRecipes();
+        List<Recipe> recipes = recipeService.getRecipes().collectList().block();
 
-        assertEquals(recipes.size(), 1);
-        verify(recipeRepository, times(1)).findAll();
-        verify(recipeRepository, never()).findById(anyString());
+        assertEquals(recipes.size(), 2);
+        verify(recipeReactiveRepository, times(1)).findAll();
+        verify(recipeReactiveRepository, never()).findById(anyString());
     }
 
     @Test
@@ -75,22 +77,21 @@ public class RecipeServiceImplTest {
         String idToDelete = "1";
 
         //when
+        when(recipeReactiveRepository.deleteById(anyString())).thenReturn(Mono.empty());
         recipeService.deleteById(idToDelete);
 
         //then
-        verify(recipeRepository, times(1)).deleteById(anyString());
+        verify(recipeReactiveRepository, times(1)).deleteById(anyString());
     }
 
     @Test(expected = NotFoundException.class)
     public void testRecipeByIdNotFound() {
-        //given
-        Optional<Recipe> recipeOptional = Optional.empty();
 
         //when
-        when(recipeRepository.findById(anyString())).thenReturn(recipeOptional);
+        when(recipeReactiveRepository.findById(anyString())).thenReturn(Mono.empty());
 
         //then
-        Recipe recipeReturned = recipeService.findById("1");
+        Recipe recipeReturned = recipeService.findById("1").block();
         //should go boom
     }
 }

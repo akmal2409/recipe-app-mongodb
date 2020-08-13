@@ -1,21 +1,24 @@
 package tech.talci.recipeapp.services;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import tech.talci.recipeapp.commands.IngredientCommand;
 import tech.talci.recipeapp.commands.RecipeCommand;
 import tech.talci.recipeapp.domain.Ingredient;
 import tech.talci.recipeapp.domain.Recipe;
 
+import java.util.List;
 import java.util.Set;
 
 public interface RecipeService {
 
-    Set<Recipe> getRecipes();
+    Flux<Recipe> getRecipes();
 
-    Recipe findById(String id);
+    Mono<Recipe> findById(String id);
 
-    RecipeCommand saveRecipeCommand(RecipeCommand command);
+    Mono<RecipeCommand> saveRecipeCommand(RecipeCommand command);
 
-    RecipeCommand findCommandById(String id);
+    Mono<RecipeCommand> findCommandById(String id);
 
-    void deleteById(String id);
+    Mono<Void> deleteById(String id);
 }
