@@ -1,15 +1,11 @@
 package tech.talci.recipeapp.domain;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -30,8 +26,6 @@ public class Recipe {
     private Difficulty difficulty;
     private Notes notes; // OneToOne
     private Set<Ingredient> ingredients = new HashSet<>();
-
-    @DBRef
     private Set<Category> categories = new HashSet<>();
 
     public void setNotes(Notes notes) {
