@@ -1,19 +1,23 @@
 package tech.talci.recipeapp.domain;
 
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = {"recipe"})
 public class Ingredient {
 
-    private String id;
+    private String id = UUID.randomUUID().toString();
     private String description;
     private BigDecimal amount;
+
+    @DBRef
     private UnitOfMeasure uom;
     private Recipe recipe;
 

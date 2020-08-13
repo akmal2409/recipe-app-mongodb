@@ -11,17 +11,17 @@ import static org.junit.Assert.*;
 
 public class RecipeToRecipeCommandTest {
 
-    private static final Long ID_VALUE = Long.valueOf(1L);
+    private static final String ID_VALUE = "1";
     private static final String DESCRIPTION = "Description";
     private static final Integer PREP_TIME = Integer.valueOf(15);
     private static final Integer COOK_TIME = Integer.valueOf(12);
     private static final String SOURCE = "dojki";
     private static final String DIRECTIONS = "directions";
     private static final Integer SERVINGS = Integer.valueOf(12);
-    private static final Long INGREDIENT_ID = Long.valueOf(2L);
+    private static final String INGREDIENT_ID = "2";
     private static final Difficulty DIFFICULTY = Difficulty.EASY;
-    private static final Long NOTES_ID = Long.valueOf(3L);
-    private static final Long CATEGORY_ID = Long.valueOf(4L);
+    private static final String NOTES_ID = "3";
+    private static final String CATEGORY_ID = "4";
 
     RecipeToRecipeCommand converter;
 

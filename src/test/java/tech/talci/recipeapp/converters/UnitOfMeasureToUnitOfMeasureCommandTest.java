@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 
 public class UnitOfMeasureToUnitOfMeasureCommandTest {
 
-    public static final Long ID_VALUE = Long.valueOf(1L);
+    public static final String ID_VALUE = "1";
     public static final String DESCRIPTION = "description";
 
     UnitOfMeasureToUnitOfMeasureCommand converter;

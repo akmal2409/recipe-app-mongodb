@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 
 public class CategoryToCategoryCommandTest {
 
-    public static final Long LONG_VALUE = Long.valueOf(1L);
+    public static final String LONG_VALUE = "1";
     public static final String DESCRIPTION = "description";
 
     CategoryToCategoryCommand converter;
