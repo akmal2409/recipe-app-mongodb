@@ -56,21 +56,24 @@ public class RecipeServiceImpl implements RecipeService{
     }
 
     @Override
-    @Transactional
     public Mono<RecipeCommand> saveRecipeCommand(RecipeCommand command) {
-        Recipe detachedRecipe = recipeCommandToRecipe.convert(command); // Detached from Hibernate context
 
-        Recipe savedRecipe = recipeReactiveRepository.save(detachedRecipe).block(); // We save it, Data JPA creates entity or meges
-        log.debug("Saved recipeID: " + savedRecipe.getId());
-        RecipeCommand savedCommand = recipeToRecipeCommand.convert(savedRecipe);
-
-        return Mono.just(savedCommand);
+        return recipeReactiveRepository.save(recipeCommandToRecipe.convert(command))
+                .map(recipeToRecipeCommand::convert);
     }
 
     @Override
-    @Transactional
     public Mono<RecipeCommand> findCommandById(String id) {
-        return Mono.just(recipeToRecipeCommand.convert(findById(id).block()));
+        return recipeReactiveRepository.findById(id)
+                .map(recipe -> {
+                    RecipeCommand command = recipeToRecipeCommand.convert(recipe);
+
+                    command.getIngredients().forEach(ic -> {
+                        ic.setRecipeId(command.getId());
+                    });
+
+                    return command;
+                });
     }
 
     @Override
