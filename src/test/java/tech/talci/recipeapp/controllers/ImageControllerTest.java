@@ -60,6 +60,10 @@ public class ImageControllerTest {
 
     @Test
     public void testHandleImagePost() throws Exception{
+        //when
+        when(imageService.saveImageFile(any(), any())).thenReturn(Mono.empty());
+
+        //then
         MockMultipartFile multipartFile =
                 new MockMultipartFile("imagefile", "testing.txt", "text/plain",
                         "Recipe App".getBytes());

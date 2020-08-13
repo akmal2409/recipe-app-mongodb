@@ -48,6 +48,8 @@ public class IndexControllerTest {
     public void testMockMvc() throws Exception {
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
+        when(recipeService.getRecipes()).thenReturn(Flux.empty());
+
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"));
@@ -57,14 +59,17 @@ public class IndexControllerTest {
     public void getIndexPage() {
 
         // given
+        Set<Recipe> recipes = new HashSet<>();
         Recipe recipe1 = new Recipe();
         Recipe recipe2 = new Recipe();
         recipe1.setDirections("Test Recipe 1");
         recipe2.setDirections("Test Recipe 2");
+        recipes.add(recipe1);
+        recipes.add(recipe2);
 
-        when(recipeService.getRecipes()).thenReturn(Flux.just(recipe1, recipe2));
+        when(recipeService.getRecipes()).thenReturn(Flux.fromIterable(recipes));
 
-        ArgumentCaptor<Flux<Recipe>> argumentCaptor = ArgumentCaptor.forClass(Flux.class);
+        ArgumentCaptor<List<Recipe>> argumentCaptor = ArgumentCaptor.forClass(List.class);
 
         // when
         String viewName = controller.getIndexPage(model);
@@ -73,7 +78,7 @@ public class IndexControllerTest {
         assertEquals("index", viewName);
         verify(recipeService, times(1)).getRecipes();
         verify(model, times(1)).addAttribute(eq("recipes"), argumentCaptor.capture());
-        List<Recipe> setInController = argumentCaptor.getValue().collectList().block();
+        List<Recipe> setInController = argumentCaptor.getValue();
         assertEquals(2, setInController.size());
     }
 }
