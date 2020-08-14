@@ -192,6 +192,6 @@
 
   <scm>
       <developerConnection>scm:git:git@github.com:akmal2409/recipe-app-mongodb.git</developerConnection>
-    <tag>recipe-app-0.0.1</tag>
+    <tag>HEAD</tag>
   </scm>
 </project>
