@@ -8,7 +8,6 @@ https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller
 
 # Future Plans and Improvements
   * Deploy in Docker
-~~* Move to MYSQL or Mongo
 
 # Clone repository
 #### SSH
